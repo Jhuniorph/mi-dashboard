@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de comunicación</title>
+
+<!-- Iconos Tabler -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.7.0/dist/tabler-icons.min.css">
+<!-- Tipografía -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  /* Tipografía */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Sora', 'Inter', sans-serif;
+
+  /* Radios */
+  --border-radius-md: 8px;
+  --border-radius-lg: 12px;
+
+  /* Fondos */
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f7f6f3;
+  --color-background-tertiary: #fbfbfa;
+
+  /* Texto */
+  --color-text-primary: #2f2c28;
+  --color-text-secondary: #5f5b54;
+  --color-text-tertiary: #9b9690;
+
+  /* Bordes */
+  --color-border-tertiary: #e8e6e1;
+
+  /* Acento azul (info) */
+  --color-background-info: #e7f1fb;
+  --color-border-info: #c5ddf5;
+  --color-text-info: #2566a8;
+
+  /* Acento ámbar (warning) */
+  --color-background-warning: #fbf0dc;
+  --color-border-warning: #f0dcb0;
+  --color-text-warning: #9a6512;
+
+  /* Acento verde (success) */
+  --color-background-success: #e3f5ed;
+  --color-border-success: #bce4d3;
+  --color-text-success: #0f6e56;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary: #2a2a28;
+    --color-background-secondary: #242422;
+    --color-background-tertiary: #1f1f1d;
+    --color-text-primary: #ededeb;
+    --color-text-secondary: #b8b5af;
+    --color-text-tertiary: #8a8782;
+    --color-border-tertiary: #3a3a37;
+    --color-background-info: #1e3a52;
+    --color-border-info: #2d5680;
+    --color-text-info: #8fc0ef;
+    --color-background-warning: #463618;
+    --color-border-warning: #6b5424;
+    --color-text-warning: #e3b765;
+    --color-background-success: #1c3d33;
+    --color-border-success: #2d5e4e;
+    --color-text-success: #7fd4b3;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; background: var(--color-background-tertiary); }
+.page-title { font-family: var(--font-display); }
+
+/* Mejoras visuales */
+.week-card { box-shadow: 0 1px 2px rgba(0,0,0,0.04); transition: box-shadow 0.15s, transform 0.15s; }
+.week-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+.stat-card { box-shadow: 0 1px 2px rgba(0,0,0,0.03); transition: transform 0.15s; }
+.stat-card:hover { transform: translateY(-1px); }
+.fre-card { transition: transform 0.15s; }
+.fre-card:hover { transform: translateY(-1px); }
+.main { animation: fadeIn 0.4s ease; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+@media (max-width: 640px) {
+  .app { flex-direction: column; }
+  .sidebar { width: 100%; min-width: 0; height: auto; position: relative; border-right: none; border-bottom: 0.5px solid var(--color-border-tertiary); display: flex; flex-wrap: wrap; gap: 2px; }
+  .main { padding: 1.25rem; }
+  .stat-grid, .fre-grid { grid-template-columns: 1fr; }
+}
+
+.app { display: flex; min-height: 100vh; background: var(--color-background-tertiary); }
+
+.sidebar {
+  width: 220px; min-width: 220px;
+  background: var(--color-background-secondary);
+  border-right: 0.5px solid var(--color-border-tertiary);
+  padding: 1.5rem 0;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
+}
+
+.sidebar-title {
+  font-size: 11px; font-weight: 500; letter-spacing: 0.08em;
+  color: var(--color-text-tertiary);
+  padding: 0 1rem 0.75rem;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 1rem; cursor: pointer;
+  font-size: 13px; color: var(--color-text-secondary);
+  border-radius: 0; transition: background 0.1s;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.nav-item:hover { background: var(--color-background-primary); color: var(--color-text-primary); }
+.nav-item.active { background: var(--color-background-primary); color: var(--color-text-primary); font-weight: 500; }
+.nav-item i { font-size: 15px; opacity: 0.6; }
+.nav-item.active i { opacity: 1; }
+
+.nav-section { margin-top: 1.5rem; }
+.nav-section-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.1em;
+  color: var(--color-text-tertiary); padding: 0 1rem 0.4rem;
+  text-transform: uppercase;
+}
+
+.main { flex: 1; padding: 2rem 2.5rem; max-width: 800px; }
+
+.page-header { margin-bottom: 2rem; }
+.page-emoji { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+.page-title { font-size: 28px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 0.5rem; }
+.page-desc { font-size: 14px; color: var(--color-text-secondary); line-height: 1.6; }
+
+.section { display: none; }
+.section.active { display: block; }
+
+.callout {
+  background: var(--color-background-info);
+  border: 0.5px solid var(--color-border-info);
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1rem;
+  font-size: 13px; color: var(--color-text-info);
+  margin-bottom: 1.5rem;
+  display: flex; gap: 8px; align-items: flex-start;
+}
+
+.week-card {
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  background: var(--color-background-primary);
+  margin-bottom: 1rem;
+  overflow: hidden;
+}
+
+.week-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.875rem 1.25rem;
+  cursor: pointer; user-select: none;
+}
+.week-header:hover { background: var(--color-background-secondary); }
+
+.week-meta { display: flex; align-items: center; gap: 10px; }
+.week-badge {
+  font-size: 11px; font-weight: 500; padding: 3px 8px;
+  border-radius: 4px; background: var(--color-background-secondary);
+  color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary);
+}
+.week-title { font-size: 14px; font-weight: 500; color: var(--color-text-primary); }
+.week-subtitle { font-size: 12px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+.week-body { padding: 0 1.25rem 1.25rem; border-top: 0.5px solid var(--color-border-tertiary); }
+.week-body.collapsed { display: none; }
+
+.exercise {
+  margin-top: 1rem;
+  padding: 0.875rem 1rem;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-tertiary);
+}
+.exercise-title {
+  font-size: 13px; font-weight: 500; color: var(--color-text-primary);
+  margin-bottom: 0.5rem; display: flex; align-items: center; gap: 6px;
+}
+.exercise-title i { font-size: 14px; color: var(--color-text-tertiary); }
+.exercise-body { font-size: 13px; color: var(--color-text-secondary); line-height: 1.65; }
+.exercise-body p { margin-bottom: 0.5rem; }
+.exercise-body p:last-child { margin-bottom: 0; }
+
+.highlight {
+  display: inline-block;
+  background: var(--color-background-warning);
+  color: var(--color-text-warning);
+  font-size: 12px; padding: 2px 7px;
+  border-radius: 4px; font-weight: 500;
+}
+
+.progress-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 0.75rem;
+}
+.progress-label { font-size: 12px; color: var(--color-text-secondary); min-width: 90px; }
+.progress-bar-bg {
+  flex: 1; height: 4px; background: var(--color-background-secondary);
+  border-radius: 2px; overflow: hidden;
+  border: 0.5px solid var(--color-border-tertiary);
+}
+.progress-bar-fill { height: 100%; border-radius: 2px; }
+
+.checklist { margin-top: 0.75rem; }
+.check-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 5px 0; cursor: pointer; font-size: 13px;
+  color: var(--color-text-secondary); line-height: 1.5;
+}
+.check-item input[type=checkbox] { margin-top: 2px; cursor: pointer; accent-color: #1D9E75; }
+.check-item.done { color: var(--color-text-tertiary); text-decoration: line-through; }
+
+.criteria-box {
+  margin-top: 1rem; padding: 0.875rem 1rem;
+  background: var(--color-background-success);
+  border: 0.5px solid var(--color-border-success);
+  border-radius: var(--border-radius-md);
+}
+.criteria-title { font-size: 12px; font-weight: 500; color: var(--color-text-success); margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.criteria-item { font-size: 13px; color: var(--color-text-success); line-height: 1.6; display: flex; gap: 6px; margin-bottom: 2px; }
+
+.schedule-table { width: 100%; border-collapse: collapse; }
+.schedule-table th {
+  font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em;
+  color: var(--color-text-tertiary); text-align: left;
+  padding: 0.5rem 0.75rem; border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.schedule-table td {
+  font-size: 13px; color: var(--color-text-secondary);
+  padding: 0.6rem 0.75rem; border-bottom: 0.5px solid var(--color-border-tertiary);
+  vertical-align: top;
+}
+.schedule-table tr:last-child td { border-bottom: none; }
+.schedule-table td:first-child { font-weight: 500; color: var(--color-text-primary); white-space: nowrap; }
+
+.tag {
+  display: inline-block; font-size: 11px; font-weight: 500;
+  padding: 2px 7px; border-radius: 4px; margin-right: 4px;
+}
+.tag-s1 { background: var(--color-background-info); color: var(--color-text-info); }
+.tag-s2 { background: var(--color-background-warning); color: var(--color-text-warning); }
+.tag-s3 { background: #E1F5EE; color: #0F6E56; }
+.tag-plus { background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+
+.divider { height: 0.5px; background: var(--color-border-tertiary); margin: 1.5rem 0; }
+
+.stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+.stat-card {
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  padding: 0.875rem 1rem;
+}
+.stat-label { font-size: 11px; color: var(--color-text-tertiary); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-value { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.stat-sub { font-size: 12px; color: var(--color-text-tertiary); margin-top: 2px; }
+
+.chevron { transition: transform 0.2s; font-size: 14px; color: var(--color-text-tertiary); }
+.chevron.open { transform: rotate(180deg); }
+
+.fre-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 0.75rem; }
+.fre-card {
+  padding: 0.875rem;
+  border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-tertiary);
+}
+.fre-letter { font-size: 22px; font-weight: 500; margin-bottom: 4px; }
+.fre-name { font-size: 12px; font-weight: 500; color: var(--color-text-secondary); margin-bottom: 6px; }
+.fre-desc { font-size: 12px; color: var(--color-text-tertiary); line-height: 1.5; }
+</style>
+</head>
+<body>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)">Sistema de entrenamiento de comunicación personal — protocolos y ejercicios</h2>
+
+<div class="app">
+  <nav class="sidebar" aria-label="Navegación principal">
+    <p class="sidebar-title">Mi sistema</p>
+    <button class="nav-item active" onclick="navigate('overview')" id="nav-overview">
+      <i class="ti ti-layout-dashboard" aria-hidden="true"></i> Vista general
+    </button>
+    <button class="nav-item" onclick="navigate('schedule')" id="nav-schedule">
+      <i class="ti ti-calendar" aria-hidden="true"></i> Protocolo diario
+    </button>
+
+    <div class="nav-section">
+      <p class="nav-section-label">Sistemas</p>
+      <button class="nav-item" onclick="navigate('s1')" id="nav-s1">
+        <i class="ti ti-award" aria-hidden="true"></i> 1 · Johnstone Status
+      </button>
+      <button class="nav-item" onclick="navigate('s2')" id="nav-s2">
+        <i class="ti ti-microphone" aria-hidden="true"></i> 2 · Vocal Awareness
+      </button>
+      <button class="nav-item" onclick="navigate('s3')" id="nav-s3">
+        <i class="ti ti-eye" aria-hidden="true"></i> 3 · Meisner
+      </button>
+    </div>
+
+    <div class="nav-section">
+      <p class="nav-section-label">Fluencia</p>
+      <button class="nav-item" onclick="navigate('fluency')" id="nav-fluency">
+        <i class="ti ti-message-circle" aria-hidden="true"></i> Fluidez verbal
+      </button>
+      <button class="nav-item" onclick="navigate('conversation')" id="nav-conversation">
+        <i class="ti ti-users" aria-hidden="true"></i> De qué hablar
+      </button>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <div class="section active" id="section-overview">
+      <div class="page-header">
+        <span class="page-emoji">🧠</span>
+        <h1 class="page-title">Sistema de comunicación</h1>
+        <p class="page-desc">Protocolo de entrenamiento en solitario · 3 sistemas en orden de prioridad · Basado en Johnstone, Joseph y Meisner</p>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <p class="stat-label">Duración total</p>
+          <p class="stat-value">10+ sem</p>
+          <p class="stat-sub">Continuo desde semana 10</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Tiempo diario</p>
+          <p class="stat-value">40 min</p>
+          <p class="stat-sub">Dividido en 3 bloques</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-label">Sistemas</p>
+          <p class="stat-value">3</p>
+          <p class="stat-sub">+ Fluencia verbal</p>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge tag-s1">Sistema 1</span>
+            <div>
+              <p class="week-title">Johnstone Status</p>
+              <p class="week-subtitle">Semanas 1–3 · Control de jerarquía social</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="progress-row" style="margin-top:1rem">
+            <span class="progress-label">Progreso</span>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%;background:#378ADD"></div></div>
+            <span style="font-size:12px;color:var(--color-text-tertiary)">0 / 3 sem</span>
+          </div>
+          <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.65">En cada interacción, cada persona emite señales de status alto o bajo sin darse cuenta. Este sistema entrena reconocerlas y controlarlas conscientemente. Es el primer filtro con el que otros te perciben.</p>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge tag-s2">Sistema 2</span>
+            <div>
+              <p class="week-title">Vocal Awareness — Arthur Joseph</p>
+              <p class="week-subtitle">Semanas 4–7 · Autoridad vocal</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="progress-row" style="margin-top:1rem">
+            <span class="progress-label">Progreso</span>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:0%;background:#BA7517"></div></div>
+            <span style="font-size:12px;color:var(--color-text-tertiary)">0 / 4 sem</span>
+          </div>
+          <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.65">La voz es el segundo filtro antes de que el contenido importe. Trabaja respiración diafragmática, resonancia de pecho, apertura articulatoria y silencio activo como herramientas de autoridad.</p>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge tag-s3">Sistema 3</span>
+            <div>
+              <p class="week-title">Meisner — Adaptación solo</p>
+              <p class="week-subtitle">Semana 10+ · Presencia y respuesta real</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.65;margin-top:1rem">Presencia real significa que tu mente está en la conversación, no comentándola. Trabaja el estado interno desde el que hablas. Sin esto, todo lo demás es actuación y se nota.</p>
+          <div class="callout" style="margin-top:1rem;margin-bottom:0">
+            <i class="ti ti-info-circle" aria-hidden="true"></i>
+            <span>Meisner fue diseñado para dos personas. La adaptación solo entrena la mitad del sistema. La otra mitad se completa en interacciones reales cuando los dos sistemas anteriores ya funcionan.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISTEMA 1 -->
+    <div class="section" id="section-s1">
+      <div class="page-header">
+        <span class="page-emoji">⚡</span>
+        <h1 class="page-title">Sistema 1 — Johnstone Status</h1>
+        <p class="page-desc">3 semanas · Una conducta a la vez · Registro obligatorio</p>
+      </div>
+
+      <div class="callout">
+        <i class="ti ti-info-circle" aria-hidden="true"></i>
+        <span>No mezcles semanas. Termina cada una antes de avanzar. El criterio de avance está al final de cada semana.</span>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Semana 1</span>
+            <div>
+              <p class="week-title">Reconocimiento</p>
+              <p class="week-subtitle">Observar sin actuar · Solo registrar</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron open" aria-hidden="true"></i>
+        </div>
+        <div class="week-body">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-eye" aria-hidden="true"></i> Observación post-interacción</p>
+            <div class="exercise-body">
+              <p>Después de cada interacción del día, respóndete estas tres preguntas por escrito:</p>
+              <p>· ¿Quién llevó el ritmo de la conversación?</p>
+              <p>· ¿En qué momento cedí terreno sin querer?</p>
+              <p>· ¿Qué conducta específica lo provocó?</p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-list-check" aria-hidden="true"></i> Identificar tu conducta de status bajo</p>
+            <div class="exercise-body">
+              <p>Elige <span class="highlight">una sola</span> de estas conductas que hagas con frecuencia. Solo una.</p>
+              <div class="checklist" id="checklist-s1w1"></div>
+            </div>
+          </div>
+          <div class="criteria-box">
+            <p class="criteria-title">Para avanzar a semana 2</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> Tienes identificada una conducta específica de status bajo que haces consistentemente</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> Llevas al menos 5 días de registros escritos</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Semana 2</span>
+            <div>
+              <p class="week-title">Eliminación quirúrgica</p>
+              <p class="week-subtitle">Una conducta · Todos los días</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-target" aria-hidden="true"></i> Protocolo de eliminación</p>
+            <div class="exercise-body">
+              <p>Antes de cada interacción, una frase mental: <span class="highlight">"Hoy no hago [tu conducta]."</span> Nada más.</p>
+              <p>No pienses en todo lo demás. Solo esa conducta.</p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-user" aria-hidden="true"></i> Ejercicio de espejo · 10 repeticiones al día</p>
+            <div class="exercise-body">
+              <p>Frente al espejo, di una opinión que normalmente suavizarías. Termínala. Para. No agregues nada. Sostén tu propia mirada <span class="highlight">3 segundos</span> en silencio después de terminar.</p>
+              <p>Lo que entrenas: tolerar el silencio sin llenarlo con justificaciones o preguntas de aprobación.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Semana 3</span>
+            <div>
+              <p class="week-title">Instalación de status alto</p>
+              <p class="week-subtitle">Tono descendente · 15 min/día grabado</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-microphone" aria-hidden="true"></i> El tono descendente</p>
+            <div class="exercise-body">
+              <p>Grábate diciendo 10 afirmaciones distintas. Escúchate. Marca cuáles suben al final y cuáles bajan. Repite cada una que sube hasta que baje.</p>
+              <p>El tono descendente al final de una frase es la señal acústica más inmediata de seguridad. El cerebro del otro la procesa antes que el contenido.</p>
+            </div>
+          </div>
+          <div class="criteria-box">
+            <p class="criteria-title">Criterio para avanzar al Sistema 2</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> La conducta de status bajo ya no aparece de forma automática</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> Tono descendente consistente en tus grabaciones</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> En al menos una interacción notaste que llevaste el ritmo, aunque sea parcialmente</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISTEMA 2 -->
+    <div class="section" id="section-s2">
+      <div class="page-header">
+        <span class="page-emoji">🎙️</span>
+        <h1 class="page-title">Sistema 2 — Vocal Awareness</h1>
+        <p class="page-desc">Arthur Joseph · 4 semanas · En capas, no mezcles</p>
+      </div>
+
+      <div class="callout">
+        <i class="ti ti-info-circle" aria-hidden="true"></i>
+        <span>Cada semana agrega una capa sobre la anterior. No pases a la siguiente hasta que la capa actual sea automática.</span>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Semana 4</span>
+            <div>
+              <p class="week-title">Respiración diafragmática</p>
+              <p class="week-subtitle">10 min mañana y noche</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron open" aria-hidden="true"></i>
+        </div>
+        <div class="week-body">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-wind" aria-hidden="true"></i> Ejercicio base de respiración</p>
+            <div class="exercise-body">
+              <p>Acostado o sentado. Mano en el abdomen.</p>
+              <p>· Inhala <span class="highlight">4 segundos</span> expandiendo el abdomen, no el pecho</p>
+              <p>· Sostén <span class="highlight">2 segundos</span></p>
+              <p>· Exhala <span class="highlight">6 segundos</span> vaciando desde el abdomen</p>
+              <p style="margin-top:0.5rem">Si tu pecho se mueve primero, estás respirando mal. El pecho no debe moverse.</p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-volume" aria-hidden="true"></i> Aplicación vocal</p>
+            <div class="exercise-body">
+              <p>Al final de cada sesión, manteniendo esa respiración, di tres frases en voz alta. La voz debe salir sostenida por el abdomen, no empujada desde la garganta.</p>
+              <p>Grábate. Compara el inicio de la semana con el final.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Semana 5</span>
+            <div>
+              <p class="week-title">Resonancia de pecho</p>
+              <p class="week-subtitle">10 min/día · Mano en el esternón</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-ripple" aria-hidden="true"></i> Ejercicio de colocación</p>
+            <div class="exercise-body">
+              <p>Pon la mano en el esternón. Hum con la boca cerrada buscando sentir vibración en la mano. Cuando la sientas, abre ligeramente la boca sin perder la vibración.</p>
+              <p>Ese es el punto de resonancia que buscas. Practica frases completas desde ahí.</p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-device-audio-tape" aria-hidden="true"></i> Test de progreso</p>
+            <div class="exercise-body">
+              <p>Grábate diciendo la misma frase de dos formas: primero como hablas normalmente, luego desde resonancia de pecho. La diferencia debe ser audible y notable al final de la semana.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Semana 6</span>
+            <div>
+              <p class="week-title">Apertura y articulación</p>
+              <p class="week-subtitle">Mandíbula · Labios · Finales de frase</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-mood-smile" aria-hidden="true"></i> Masticación previa</p>
+            <div class="exercise-body">
+              <p>Mastica de forma exagerada durante 30 segundos. Luego habla inmediatamente. La mandíbula relajada cambia la calidad de la voz al instante. Hacer antes de cada sesión de práctica.</p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-book" aria-hidden="true"></i> Lectura exagerada · 10 min/día</p>
+            <div class="exercise-body">
+              <p>Toma cualquier texto. Léelo exagerando el movimiento de labios y mandíbula al máximo. No importa que suene ridículo. Luego léelo normal. Nota la diferencia en claridad.</p>
+              <p><span class="highlight">5 min exagerado → 5 min normal</span></p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-arrow-right" aria-hidden="true"></i> Finales de frase</p>
+            <div class="exercise-body">
+              <p>El error más común: la voz se apaga en la última palabra. Grábate leyendo. Escucha solo las últimas palabras de cada frase. ¿Se oyen igual que las primeras? Da más soporte al final, no al inicio.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Semana 7</span>
+            <div>
+              <p class="week-title">Silencio activo</p>
+              <p class="week-subtitle">Muletillas a cero · Pausa intencional</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-microphone-off" aria-hidden="true"></i> Conteo de muletillas</p>
+            <div class="exercise-body">
+              <p>Grábate hablando 3 minutos. Cuenta cuántas veces usas muletillas: "este", "o sea", "ehhh", "o sea que". Ese es tu número base. El objetivo es reducirlo a la mitad cada semana hasta llegar a cero.</p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-pause" aria-hidden="true"></i> Pausa antes del punto importante</p>
+            <div class="exercise-body">
+              <p>Lee un texto en voz alta. Antes de cada frase importante, detente <span class="highlight">1 segundo completo</span> en silencio. Grábate. El silencio antes de algo importante aumenta su peso más que cualquier cambio de tono o volumen.</p>
+            </div>
+          </div>
+          <div class="criteria-box">
+            <p class="criteria-title">Criterio para avanzar al Sistema 3</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> Respiración diafragmática automática sin pensarlo</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> Resonancia de pecho audible en grabaciones</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> Cero muletillas en grabaciones de 3 minutos</p>
+            <p class="criteria-item"><i class="ti ti-check" aria-hidden="true"></i> El silencio ya no genera urgencia de llenarlo</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SISTEMA 3 -->
+    <div class="section" id="section-s3">
+      <div class="page-header">
+        <span class="page-emoji">👁️</span>
+        <h1 class="page-title">Sistema 3 — Meisner</h1>
+        <p class="page-desc">Adaptación en solitario · Semana 10 en adelante · Sin fecha de término</p>
+      </div>
+
+      <div class="callout">
+        <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+        <span>Meisner fue diseñado para dos personas. En solitario entrenas la mitad del sistema: el estado interno. La otra mitad se completa en interacciones reales cuando los sistemas 1 y 2 ya están operativos.</span>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge tag-s3">Componente 1</span>
+            <div>
+              <p class="week-title">Presencia sin audiencia</p>
+              <p class="week-subtitle">5 min → 15 min · Sin estímulo externo</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron open" aria-hidden="true"></i>
+        </div>
+        <div class="week-body">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-eye" aria-hidden="true"></i> Ejercicio de presencia pura</p>
+            <div class="exercise-body">
+              <p>Siéntate en silencio sin teléfono ni estímulo externo. <span class="highlight">5 minutos</span>. Sin cerrar los ojos. Solo observa lo que hay frente a ti sin nombrar lo que ves mentalmente. Solo presencia física en el espacio.</p>
+              <p>Cada semana agrega 2 minutos. Objetivo a largo plazo: 15 minutos sin que la mente se vaya.</p>
+              <p>Lo que entrenas: apagar el monólogo interno que te saca de las conversaciones.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge tag-s3">Componente 2</span>
+            <div>
+              <p class="week-title">Respuesta sin filtro</p>
+              <p class="week-subtitle">Video en pausa · Respuesta espontánea</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-player-play" aria-hidden="true"></i> Ejercicio de respuesta inmediata · 10 min/día</p>
+            <div class="exercise-body">
+              <p>Pon un video de cualquier persona hablando: podcast, entrevista, lo que sea. Ponlo en pausa en cualquier momento y responde en voz alta a lo que dijo, sin preparar la respuesta.</p>
+              <p>No importa si la respuesta es buena. El objetivo es que salga sin que la censures antes de hablar.</p>
+              <p>Con el tiempo, la respuesta espontánea se vuelve el modo por defecto.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge tag-s3">Componente 3</span>
+            <div>
+              <p class="week-title">Observación activa en el mundo real</p>
+              <p class="week-subtitle">Una variable por semana · Solo registrar</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-scan" aria-hidden="true"></i> Variable semanal de observación</p>
+            <div class="exercise-body">
+              <p>En cada conversación real, tu único objetivo esa semana es observar <span class="highlight">una sola cosa</span> del otro. Puede ser su respiración, sus manos, sus pausas, sus microexpresiones de incomodidad.</p>
+              <p>No actúes sobre lo que observas todavía. Solo entrena el músculo de la atención real.</p>
+              <p>Con el tiempo, observas múltiples cosas simultáneamente sin esfuerzo. Eso es la base de la lectura social real.</p>
+            </div>
+          </div>
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-list" aria-hidden="true"></i> Variables de observación sugeridas por semana</p>
+            <div class="exercise-body">
+              <p>Sem 10: respiración del otro · Sem 11: contacto visual · Sem 12: velocidad de habla · Sem 13: movimiento de manos · Sem 14: coherencia verbal/no verbal · Sem 15+: libre elección</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FLUENCIA -->
+    <div class="section" id="section-fluency">
+      <div class="page-header">
+        <span class="page-emoji">💬</span>
+        <h1 class="page-title">Fluidez verbal</h1>
+        <p class="page-desc">Para el problema del aislamiento y la atrofia del canal verbal · Aplicar desde hoy, paralelo a los sistemas</p>
+      </div>
+
+      <div class="callout">
+        <i class="ti ti-info-circle" aria-hidden="true"></i>
+        <span>Este módulo es paralelo a los 3 sistemas, no secuencial. Empieza desde el primer día junto al Sistema 1.</span>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Método 1</span>
+            <div>
+              <p class="week-title">Shadowing — Alexander Arguelles</p>
+              <p class="week-subtitle">15 min/día · El método más eficiente documentado</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron open" aria-hidden="true"></i>
+        </div>
+        <div class="week-body">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-repeat" aria-hidden="true"></i> Cómo ejecutarlo</p>
+            <div class="exercise-body">
+              <p>Pones un video o audio de alguien hablando y repites en voz alta exactamente lo que dice, con un retraso de <span class="highlight">2 a 3 segundos</span>. No lees, escuchas y repites.</p>
+              <p>· En voz alta, nunca en susurro</p>
+              <p>· Elige voces que hablen claro y a velocidad normal</p>
+              <p>· Las primeras semanas perderás el hilo constantemente. Eso es exactamente lo que estás entrenando</p>
+              <p>Por qué funciona: fuerza la conexión entre escucha y producción oral en tiempo real. El cerebro no puede divagar porque está ocupado siguiendo input externo.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Método 2</span>
+            <div>
+              <p class="week-title">Narración en voz alta</p>
+              <p class="week-subtitle">10 min mínimo · Durante el día en momentos solos</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-player-record" aria-hidden="true"></i> El ejercicio</p>
+            <div class="exercise-body">
+              <p>Narra lo que haces en voz alta cuando estás solo. No es hablar solo de forma random. Es producción verbal continua sobre contenido real e inmediato.</p>
+              <p>Entrena el canal pensamiento → palabra hablada sin filtro de censura. Ese canal es exactamente el que se atrofió con el aislamiento.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Método 3</span>
+            <div>
+              <p class="week-title">Explicación sin preparación</p>
+              <p class="week-subtitle">10 min/día · Cualquier tema que ya sabes</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-presentation" aria-hidden="true"></i> El ejercicio</p>
+            <div class="exercise-body">
+              <p>Toma cualquier cosa que sepas: un tema de la universidad, una película que viste, algo que leíste. Explícalo en voz alta como si se lo dijeras a alguien que no sabe nada del tema.</p>
+              <p>Sin leer. Sin preparar. Solo habla. Cuando te enredes, no pares. El objetivo no es la explicación perfecta, es mantener el flujo verbal aunque sea imperfecto.</p>
+              <p>Grábate. Los puntos de enredo son siempre los mismos hasta que los trabajas.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONVERSACIÓN -->
+    <div class="section" id="section-conversation">
+      <div class="page-header">
+        <span class="page-emoji">🗣️</span>
+        <h1 class="page-title">De qué hablar</h1>
+        <p class="page-desc">Sistema FRE + banco de temas personales · Para el bloqueo conversacional</p>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Sistema</span>
+            <div>
+              <p class="week-title">El sistema FRE</p>
+              <p class="week-subtitle">3 movimientos disponibles ante cualquier cosa que digan</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron open" aria-hidden="true"></i>
+        </div>
+        <div class="week-body">
+          <p style="font-size:13px;color:var(--color-text-secondary);margin-top:1rem;line-height:1.65">El "¿y ahora de qué hablo?" no es falta de ideas. Es falta de estructura mental para generar respuesta en tiempo real. FRE te da tres opciones disponibles ante cualquier cosa que digan.</p>
+          <div class="fre-grid">
+            <div class="fre-card" style="background:var(--color-background-info);border-color:var(--color-border-info)">
+              <p class="fre-letter" style="color:var(--color-text-info)">F</p>
+              <p class="fre-name" style="color:var(--color-text-info)">Fact / Hecho</p>
+              <p class="fre-desc" style="color:var(--color-text-info)">Conectas un hecho relacionado de tu experiencia o conocimiento con lo que dijeron</p>
+            </div>
+            <div class="fre-card" style="background:var(--color-background-warning);border-color:var(--color-border-warning)">
+              <p class="fre-letter" style="color:var(--color-text-warning)">R</p>
+              <p class="fre-name" style="color:var(--color-text-warning)">Razón / Pregunta</p>
+              <p class="fre-desc" style="color:var(--color-text-warning)">Preguntas por qué, cómo llegó a eso, qué piensa. Va a lo que sienten, no a lo que son</p>
+            </div>
+            <div class="fre-card" style="background:#E1F5EE;border-color:#9FE1CB">
+              <p class="fre-letter" style="color:#0F6E56">E</p>
+              <p class="fre-name" style="color:#0F6E56">Experiencia</p>
+              <p class="fre-desc" style="color:#0F6E56">Conectas con algo que te pasó o que sientes respecto al tema que mencionaron</p>
+            </div>
+          </div>
+          <div class="exercise" style="margin-top:1rem">
+            <p class="exercise-title"><i class="ti ti-message" aria-hidden="true"></i> Ejemplo aplicado</p>
+            <div class="exercise-body">
+              <p>Alguien dice: "Tuve un parcial horrible hoy."</p>
+              <p>· <span class="highlight">F</span>: "El profe de esa materia dicen que es el más estricto de la facultad."</p>
+              <p>· <span class="highlight">R</span>: "¿Qué parte se te complicó más?"</p>
+              <p>· <span class="highlight">E</span>: "Yo tuve uno así el mes pasado, salí sintiéndome idiota."</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <span class="week-badge">Herramienta</span>
+            <div>
+              <p class="week-title">Banco de temas personales</p>
+              <p class="week-subtitle">Se construye una vez · Se usa siempre</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <div class="exercise">
+            <p class="exercise-title"><i class="ti ti-pencil" aria-hidden="true"></i> Las preguntas que respondes</p>
+            <div class="exercise-body">
+              <p>Escríbelas de verdad. Con 2 o 3 respuestas por categoría tienes material para múltiples conversaciones.</p>
+              <p>· ¿Qué estoy haciendo ahora que me interesa aunque sea un poco?</p>
+              <p>· ¿Qué vi, leí o escuché esta semana que me pareció curioso?</p>
+              <p>· ¿Qué me molesta de algo en mi entorno?</p>
+              <p>· ¿Qué me gustaría aprender o hacer?</p>
+            </div>
+          </div>
+          <div class="callout" style="margin-top:1rem;margin-bottom:0">
+            <i class="ti ti-bulb" aria-hidden="true"></i>
+            <span>Las personas que parecen tener facilidad conversacional no improvisan de la nada. Tienen un repertorio personal de temas que conocen bien y saben cómo conectarlos con lo que el otro dice.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHEDULE -->
+    <div class="section" id="section-schedule">
+      <div class="page-header">
+        <span class="page-emoji">📅</span>
+        <h1 class="page-title">Protocolo diario</h1>
+        <p class="page-desc">40 minutos totales · 3 bloques · Todos los días</p>
+      </div>
+
+      <div class="week-card" style="margin-bottom:1.5rem">
+        <div class="week-header" style="cursor:default">
+          <div class="week-meta">
+            <i class="ti ti-sun" aria-hidden="true" style="font-size:18px;color:var(--color-text-warning)"></i>
+            <div>
+              <p class="week-title">Mañana · 15 min</p>
+              <p class="week-subtitle">Vocal + Sistema activo de la semana</p>
+            </div>
+          </div>
+        </div>
+        <div class="week-body" style="display:block">
+          <table class="schedule-table">
+            <thead><tr><th>Semanas</th><th>Ejercicio</th><th>Tiempo</th></tr></thead>
+            <tbody>
+              <tr><td>1–3</td><td>Shadowing + observación del día anterior</td><td>15 min</td></tr>
+              <tr><td>4–7</td><td>Respiración + ejercicio vocal de la semana activa</td><td>15 min</td></tr>
+              <tr><td>8+</td><td>Presencia sin audiencia + shadowing</td><td>15 min</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="week-card" style="margin-bottom:1.5rem">
+        <div class="week-header" style="cursor:default">
+          <div class="week-meta">
+            <i class="ti ti-clock" aria-hidden="true" style="font-size:18px;color:var(--color-text-secondary)"></i>
+            <div>
+              <p class="week-title">Durante el día · 10 min acumulados</p>
+              <p class="week-subtitle">Narración en voz alta en momentos solos</p>
+            </div>
+          </div>
+        </div>
+        <div class="week-body" style="display:block">
+          <p style="font-size:13px;color:var(--color-text-secondary);line-height:1.65">En cualquier momento en que estés solo: caminando, cocinando, en el cuarto. Narras en voz alta lo que haces o explicas algo que sepas. No son 10 minutos seguidos, son acumulados a lo largo del día.</p>
+        </div>
+      </div>
+
+      <div class="week-card" style="margin-bottom:1.5rem">
+        <div class="week-header" style="cursor:default">
+          <div class="week-meta">
+            <i class="ti ti-moon" aria-hidden="true" style="font-size:18px;color:var(--color-text-info)"></i>
+            <div>
+              <p class="week-title">Noche · 15 min</p>
+              <p class="week-subtitle">Grabación + análisis + registro</p>
+            </div>
+          </div>
+        </div>
+        <div class="week-body" style="display:block">
+          <table class="schedule-table">
+            <thead><tr><th>Ejercicio</th><th>Tiempo</th></tr></thead>
+            <tbody>
+              <tr><td>Grabación libre de 3 min hablando sin guion</td><td>3 min</td></tr>
+              <tr><td>Escucha y marca: muletillas, tono, enredos</td><td>5 min</td></tr>
+              <tr><td>Respuesta sin filtro (video en pausa)</td><td>5 min</td></tr>
+              <tr><td>Registro escrito del día: qué mejoró, qué falló</td><td>2 min</td></tr>
+            </tbody>
+          </table>
+          <div class="callout" style="margin-top:1rem;margin-bottom:0">
+            <i class="ti ti-alert-circle" aria-hidden="true"></i>
+            <span>El registro escrito no es opcional. Sin comparación no hay calibración. Guarda todas tus grabaciones con fecha. El progreso en comunicación es gradual y sin registro no lo percibes.</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="week-card">
+        <div class="week-header" onclick="toggleCard(this)">
+          <div class="week-meta">
+            <i class="ti ti-calendar-stats" aria-hidden="true" style="font-size:18px;color:var(--color-text-secondary)"></i>
+            <div>
+              <p class="week-title">Mapa de semanas</p>
+              <p class="week-subtitle">Resumen completo del recorrido</p>
+            </div>
+          </div>
+          <i class="ti ti-chevron-down chevron" aria-hidden="true"></i>
+        </div>
+        <div class="week-body collapsed">
+          <table class="schedule-table" style="margin-top:1rem">
+            <thead><tr><th>Semana</th><th>Sistema</th><th>Foco</th></tr></thead>
+            <tbody>
+              <tr><td>1</td><td><span class="tag tag-s1">Johnstone</span></td><td>Observación y registro</td></tr>
+              <tr><td>2</td><td><span class="tag tag-s1">Johnstone</span></td><td>Eliminar conducta de status bajo</td></tr>
+              <tr><td>3</td><td><span class="tag tag-s1">Johnstone</span></td><td>Instalar tono descendente</td></tr>
+              <tr><td>4–5</td><td><span class="tag tag-s2">Vocal</span></td><td>Respiración diafragmática</td></tr>
+              <tr><td>5–6</td><td><span class="tag tag-s2">Vocal</span></td><td>Resonancia y apertura</td></tr>
+              <tr><td>7</td><td><span class="tag tag-s2">Vocal</span></td><td>Silencio activo</td></tr>
+              <tr><td>10+</td><td><span class="tag tag-s3">Meisner</span></td><td>Presencia, respuesta espontánea, observación</td></tr>
+              <tr><td>Paralelo</td><td><span class="tag tag-plus">Fluencia</span></td><td>Shadowing + narración + explicación</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function navigate(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  var el = document.getElementById('section-' + id);
+  var nav = document.getElementById('nav-' + id);
+  if (el) el.classList.add('active');
+  if (nav) nav.classList.add('active');
+}
+
+function toggleCard(header) {
+  var body = header.nextElementSibling;
+  var chevron = header.querySelector('.chevron');
+  if (body.classList.contains('collapsed')) {
+    body.classList.remove('collapsed');
+    if (chevron) chevron.classList.add('open');
+  } else {
+    body.classList.add('collapsed');
+    if (chevron) chevron.classList.remove('open');
+  }
+}
+
+var conductasS1W1 = [
+  'Reírme antes de terminar lo que estoy diciendo',
+  'Justificarme sin que nadie me lo pidió',
+  'Cambiar de opinión cuando el otro frunce el ceño',
+  'Hablar más rápido cuando siento que el otro se aburre',
+  'Decir "¿me explico?" o "¿verdad?" después de cada idea'
+];
+
+var s1w1 = document.getElementById('checklist-s1w1');
+if (s1w1) {
+  conductasS1W1.forEach(function(c, i) {
+    var key = 's1w1-' + i;
+    var checked = localStorage ? (localStorage.getItem(key) === '1') : false;
+    var div = document.createElement('label');
+    div.className = 'check-item' + (checked ? ' done' : '');
+    div.innerHTML = '<input type="checkbox" ' + (checked ? 'checked' : '') + '> ' + c;
+    var input = div.querySelector('input');
+    input.addEventListener('change', function() {
+      if (this.checked) { div.classList.add('done'); try { localStorage.setItem(key, '1'); } catch(e){} }
+      else { div.classList.remove('done'); try { localStorage.removeItem(key); } catch(e){} }
+    });
+    s1w1.appendChild(div);
+  });
+}
+</script>
+
+</body>
+</html>
